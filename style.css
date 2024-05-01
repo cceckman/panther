@@ -1,0 +1,26 @@
+body {
+	background-color: gray;
+	margin: 0;
+	padding: 0;
+}
+
+main {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: monospace;
+	flex-direction: column;
+
+	margin: 0;
+	padding: 0;
+
+	width: 100vw;
+	height: 100vh;
+}
+
+#cage {
+	margin: 1vh;
+
+	height: min(50vh, 50vw);
+	width: min(50vw, 50vh);
+}
