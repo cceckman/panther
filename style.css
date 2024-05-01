@@ -1,7 +1,11 @@
 body {
 	background-color: gray;
+}
+
+html * {
 	margin: 0;
 	padding: 0;
+	border: 0;
 }
 
 main {
@@ -11,16 +15,11 @@ main {
 	font-family: monospace;
 	flex-direction: column;
 
-	margin: 0;
-	padding: 0;
-
 	width: 100vw;
 	height: 100vh;
 }
 
 #cage {
-	margin: 1vh;
-
-	height: min(50vh, 50vw);
-	width: min(50vw, 50vh);
+	height: 100vh;
+	width: 100vw;
 }

@@ -1,51 +1,48 @@
 
 const canvas = document.getElementById("cage");
 
-let cage_height = 100.0;
-let cage_width = 100.0;
+var size;
 
-class Panther {
-	constructor(size, x, y, xv, yv) {
-		this.x = x;
-		this.y = y;
-		this.xv = xv;
-		this.yv = yv;
-		this.size = size;
+class Axis {
+	constructor(start, end, velocity) {
+		this.start = start;
+		this.end = end;
+		this.velocity = velocity;
+		this.position = Math.random() * (this.end - this.start) + this.start;
 	}
 
-	// Update X and Y coordinates by the veolcity.
-	pace(speed) {
-		const newx = this.xv * speed + this.x;
-		const newy = this.yv * speed + this.y;
+	update(speed, start, end) {
+		const n = this.velocity * speed + this.position;
+		this.start = start;
+		this.end = end;
 
-
-		this.x = Math.max(this.size, Math.min(cage_width - this.size, newx));
-		this.y = Math.max(this.size, Math.min(cage_width - this.size, newy));
-	}
-
-	// Bounce off the walls of the cage- maybe.
-	collide() {
-		const x_distance = Math.min(this.x, cage_width - this.x);
-		const y_distance = Math.min(this.y, cage_height - this.y);
-
-		if (x_distance <= this.size) {
-			// X collision. Reflect X velocity.
-			this.xv = 0 - this.xv;
-		}
-		if (y_distance <= this.size) {
-			// Y collision. Reflect Y velocity.
-			this.yv = 0 - this.yv;
+		if (n < (this.start + size) || n > (this.end - size)) {
+			// Collide, and change position in the other directon:
+			this.velocity = -this.velocity;
+			this.position += this.velocity * speed;
+		} else {
+			this.position = n;
 		}
 	}
 
-	draw(ctx) {
-		ctx.fillStyle = "black";
-
-		ctx.beginPath();
-		ctx.ellipse(this.x, this.y, this.size, this.size, 0, 0, 360);
-		ctx.fill();
-		ctx.closePath();
+	get() {
+		return this.position;
 	}
+}
+
+var x = null;
+var y = null;
+
+function draw(ctx) {
+	ctx.fillStyle = "darkgray";
+	ctx.fillRect(x.start, y.start, x.end - x.start, y.end - y.start);
+
+	ctx.fillStyle = "black";
+
+	ctx.beginPath();
+	ctx.ellipse(x.get(), y.get(), size, size, 0, 0, 360);
+	ctx.fill();
+	ctx.closePath();
 }
 
 let panther = null;
@@ -56,31 +53,24 @@ function rerender(timestamp) {
 
 	canvas.height = canvas.clientHeight;
 	canvas.width = canvas.clientWidth;
-	cage_height = canvas.height;
-	cage_width = canvas.width;
+	let xmargin = canvas.width / 4;
+	let ymargin = canvas.width / 4;
+
 	let ctx = canvas.getContext("2d");
+	ctx.fillStyle = "gray";
+	ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-	ctx.fillStyle = "darkgray";
-	ctx.fillRect(0, 0, cage_width, cage_height);
-
-	if (panther === null) {
-		const size = Math.min(cage_width, cage_height) * 0.24;
-		// Avoid collisions at start:
-		const x = Math.random() * (cage_width - 2 * size) + size;
-		const y = Math.random() * (cage_height - 2 * size) + size;
-		// Kinda-random values;
-		// no idea what the scale is?
-		const xv = Math.random() * size * 0.1;
-		const yv = Math.random() * size * 0.1;
-
-		panther = new Panther(size, x, y, xv, yv)
+	if (x === null) {
+		x = new Axis(xmargin, xmargin * 3, Math.random() * xmargin * 0.02);
+	}
+	if (y === null) {
+		y = new Axis(ymargin, ymargin * 3, Math.random() * ymargin * 0.02);
 	}
 
-	panther.collide();
 	let speed = timestamp - last_render;
-	last_render = timestamp;
-	panther.pace(speed / 100);
-	panther.draw(ctx);
+	x.update(speed / 100, xmargin, xmargin * 3);
+	y.update(speed / 100, ymargin, ymargin * 3);
+	draw(ctx);
 }
 
 window.requestAnimationFrame(rerender);
